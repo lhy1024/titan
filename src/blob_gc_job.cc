@@ -119,15 +119,21 @@ Status BlobGCJob::Run() {
     return s;
   }
 
-  if (blob_gc_->gc_sampled_inputs().empty() && blob_gc_->fs_sampled_inputs().empty()) {
-    return Status::OK();
+  if (!blob_gc_->gc_sampled_inputs().empty()) {
+    Status s = DoRunGC();
+    if (!s.ok()) {
+      return s;
+    }
   }
 
-  Status gc_s = DoRunGC();
-  if (!gc_s.ok()) {
-    return gc_s;
+  if (!blob_gc_->fs_sampled_inputs().empty()) {
+    Status s = DigHole();
+    if (!s.ok()) {
+      return s;
+    }
   }
-  return DigHole();
+
+  return Status::OK();
 }
 
 Status BlobGCJob::SampleCandidateFiles() {
