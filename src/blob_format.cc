@@ -215,7 +215,8 @@ double BlobFileMeta::GetDiscardableRatio() const {
          static_cast<double>(file_size_);
 }
 
-double BlobFileMeta::GetValidSize() const {
+uint64_t BlobFileMeta::GetValidSize() const {
+  assert(discardable_size_ < file_size_);
   return discardable_size_ < 0 ? file_size_ : file_size_ - discardable_size_;
 }
 

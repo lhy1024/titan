@@ -145,7 +145,7 @@ class BlobFileMeta {
   void AddDiscardableSize(uint64_t _discardable_size);
   void FinishFreeSpace(uint64_t new_file_size, uint64_t reclaim_size);
   double GetDiscardableRatio() const;
-  double GetValidSize() const;
+  uint64_t GetValidSize() const;
 
  private:
   // Persistent field
