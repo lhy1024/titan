@@ -143,7 +143,9 @@ class BlobFileMeta {
   void FileStateTransit(const FileEvent& event);
 
   void AddDiscardableSize(uint64_t _discardable_size);
+  void FinishFreeSpace(uint64_t new_file_size, uint64_t reclaim_size);
   double GetDiscardableRatio() const;
+  double GetValidSize() const;
 
  private:
   // Persistent field
@@ -153,7 +155,9 @@ class BlobFileMeta {
   // Not persistent field
   FileState state_{FileState::kInit};
 
-  uint64_t discardable_size_{0};
+  // discardable size can be reclaim, < 0 mean last free space over reclaim space
+  int64_t discardable_size_{0};
+
   // gc_mark is set to true when this file is recovered from re-opening the DB
   // that means this file needs to be checked for GC
   bool gc_mark_{false};

@@ -135,6 +135,7 @@ void BlobFileMeta::EncodeTo(std::string* dst) const {
 }
 
 Status BlobFileMeta::DecodeFrom(Slice* src) {
+  // TODO: (@wjhuang2016) get file size from file system
   if (!GetVarint64(src, &file_number_) || !GetVarint64(src, &file_size_)) {
     return Status::Corruption("BlobFileMeta Decode failed");
   }
@@ -201,9 +202,21 @@ void BlobFileMeta::AddDiscardableSize(uint64_t _discardable_size) {
   assert(discardable_size_ < file_size_);
 }
 
+// when free space finish call this method to keep file_size_ and discardable_size_ consistent
+void BlobFileMeta::FinishFreeSpace(uint64_t new_file_size, uint64_t reclaim_size) {
+  assert(state_ == FileState::kBeingGC);
+  assert(discardable_size_ < file_size_);
+  file_size_ = new_file_size;
+  discardable_size_= discardable_size_ - reclaim_size;
+}
+
 double BlobFileMeta::GetDiscardableRatio() const {
   return static_cast<double>(discardable_size_) /
          static_cast<double>(file_size_);
+}
+
+double BlobFileMeta::GetValidSize() const {
+  return discardable_size_ < 0 ? file_size_ : file_size_ - discardable_size_;
 }
 
 void BlobFileHeader::EncodeTo(std::string* dst) const {
