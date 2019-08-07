@@ -120,14 +120,14 @@ Status BlobGCJob::Run() {
   }
 
   if (!blob_gc_->gc_sampled_inputs().empty()) {
-    Status s = DoRunGC();
+    s = DoRunGC();
     if (!s.ok()) {
       return s;
     }
   }
 
   if (!blob_gc_->fs_sampled_inputs().empty()) {
-    Status s = DigHole();
+    s = DigHole();
     if (!s.ok()) {
       return s;
     }
