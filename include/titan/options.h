@@ -91,7 +91,7 @@ struct TitanCFOptions : public ColumnFamilyOptions {
   // Max batch size for GC.
   //
   // Default: 750MB
-  uint64_t max_gc_batch_size{750 << 30};
+  uint64_t max_gc_batch_size{750 << 20};
 
   // Min batch size for GC.
   //
