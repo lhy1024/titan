@@ -119,60 +119,62 @@ Status BlobGCJob::Run() {
     return s;
   }
 
-  std::string tmp;
-  for (const auto& f : blob_gc_->inputs()) {
-    if (!tmp.empty()) {
-      tmp.append(" ");
-    }
-    tmp.append(std::to_string(f->file_number()));
-  }
-
-  std::string tmp2;
-  for (const auto& f : blob_gc_->sampled_inputs()) {
-    if (!tmp2.empty()) {
-      tmp2.append(" ");
-    }
-    tmp2.append(std::to_string(f->file_number()));
-  }
-
-  ROCKS_LOG_BUFFER(log_buffer_, "[%s] Titan GC candidates[%s] selected[%s]",
-                   blob_gc_->column_family_handle()->GetName().c_str(),
-                   tmp.c_str(), tmp2.c_str());
-
-  if (blob_gc_->sampled_inputs().empty()) {
+  if (blob_gc_->gc_sampled_inputs().empty() && blob_gc_->fs_sampled_inputs().empty()) {
     return Status::OK();
   }
 
-  return DoRunGC();
+  Status gc_s = DoRunGC();
+  if (!gc_s.ok()) {
+    return gc_s;
+  }
+  return DigHole();
 }
 
 Status BlobGCJob::SampleCandidateFiles() {
-  std::vector<BlobFileMeta*> result;
-  for (const auto& file : blob_gc_->inputs()) {
+  std::vector<BlobFileMeta*> gc_result;
+  std::vector<BlobFileMeta*> fs_result;
+  std::set<uint64_t> gc_selected_marks;
+
+  // select files for GC
+  for (const auto& file : blob_gc_->gc_inputs()) {
     bool selected = false;
-    Status s = DoSample(file, &selected);
-    if (!s.ok()) {
-      return s;
+    if (file->GetValidSize() <= blob_gc_->titan_cf_options().merge_small_file_threshold) {
+      selected = true;
+    } else {
+      Status s = DoSample(file, &selected);
+      if (!s.ok()) {
+        return s;
+      }
     }
     if (selected) {
-      result.push_back(file);
+      gc_selected_marks.insert(file->file_number());
+      gc_result.push_back(file);
     }
   }
-  if (!result.empty()) {
-    blob_gc_->set_sampled_inputs(std::move(result));
+
+  // select files for free space
+  for (const auto& file: blob_gc_->fs_inputs()) {
+    // don't select file that already be selected to GC
+    if (gc_selected_marks.find(file->file_number()) != gc_selected_marks.end()){
+      continue;
+    }
+
+    if (file->discardable_size() >= blob_gc_->titan_cf_options().free_space_threshold) {
+      fs_result.push_back(file);
+    }
+  }
+
+  if (!gc_result.empty()) {
+    blob_gc_->set_gc_sampled_inputs(std::move(gc_result));
+  }
+  if (!fs_result.empty()) {
+    blob_gc_->set_fs_sampled_inputs(std::move(fs_result));
   }
   return Status::OK();
 }
 
 Status BlobGCJob::DoSample(const BlobFileMeta* file, bool* selected) {
   assert(selected != nullptr);
-  if (file->file_size() <=
-          blob_gc_->titan_cf_options().merge_small_file_threshold ||
-      file->GetDiscardableRatio() >=
-          blob_gc_->titan_cf_options().blob_file_discardable_ratio) {
-    *selected = true;
-    return Status::OK();
-  }
 
   // TODO: add do sample count metrics
   auto records_size = file->file_size() - BlobFileHeader::kEncodedLength -
@@ -372,7 +374,7 @@ Status BlobGCJob::DoRunGC() {
 Status BlobGCJob::BuildIterator(
     std::unique_ptr<BlobFileMergeIterator>* result) {
   Status s;
-  const auto& inputs = blob_gc_->sampled_inputs();
+  const auto& inputs = blob_gc_->gc_sampled_inputs();
   assert(!inputs.empty());
   std::vector<std::unique_ptr<BlobFileIterator>> list;
   for (std::size_t i = 0; i < inputs.size(); ++i) {
@@ -565,7 +567,7 @@ Status BlobGCJob::DeleteInputBlobFiles() {
   Status s;
   VersionEdit edit;
   edit.SetColumnFamilyID(blob_gc_->column_family_handle()->GetID());
-  for (const auto& file : blob_gc_->sampled_inputs()) {
+  for (const auto& file : blob_gc_->gc_sampled_inputs()) {
     ROCKS_LOG_INFO(db_options_.info_log, "Titan add obsolete file [%llu]",
                    file->file_number());
     metrics_.blob_db_gc_num_files++;
@@ -583,7 +585,7 @@ bool BlobGCJob::IsShutingDown() {
 
 Status BlobGCJob::DigHole() {
   Status s;
-  const auto& inputs = blob_gc_->sampled_inputs();//TODO(@lhy1024) modify to fs_sampled_inputs
+  const auto& inputs = blob_gc_->fs_sampled_inputs();
   assert(!inputs.empty());
   for (std::size_t i = 0; i < inputs.size(); ++i) {
     std::unique_ptr<PosixRandomRWFile> file;
