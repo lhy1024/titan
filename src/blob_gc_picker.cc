@@ -42,10 +42,6 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
       continue;
     }
 
-    // double valid_size = blob_file->GetValidSize();
-    // if (valid_size > cf_options_.merge_small_file_threshold ) {
-    //   break;
-    // }
     if (!stop_picking) {
       gc_blob_files.push_back(blob_file.get());
       gc_batch_size += blob_file->file_size();
