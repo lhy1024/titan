@@ -42,6 +42,10 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
       continue;
     }
 
+    if (gc_score.gc_score > cf_options_.merge_small_file_threshold) {
+      break;
+    }
+
     if (!stop_picking) {
       gc_blob_files.push_back(blob_file.get());
       gc_batch_size += blob_file->file_size();
@@ -53,8 +57,6 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
         stop_picking = true;
       }
     } else {
-      if (blob_file->GetValidSize() <= cf_options_.merge_small_file_threshold ||
-          blob_file->gc_mark()) {
         next_gc_size += blob_file->file_size();
         if (next_gc_size > cf_options_.min_gc_batch_size) {
           maybe_continue_next_time = true;
@@ -64,7 +66,6 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
                          next_gc_size);
           break;
         }
-      }
     }
   }
    // files with larger discardable size Free Space first

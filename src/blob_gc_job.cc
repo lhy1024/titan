@@ -147,6 +147,9 @@ Status BlobGCJob::SampleCandidateFiles() {
     if (file->GetValidSize() <= blob_gc_->titan_cf_options().merge_small_file_threshold) {
       selected = true;
     } else {
+      // smaple files with gc marked see if we can GC it
+      // we can not do free space on these files because we can not get 
+      // the correct discardable_size on these files
       Status s = DoSample(file, &selected);
       if (!s.ok()) {
         return s;
@@ -160,12 +163,24 @@ Status BlobGCJob::SampleCandidateFiles() {
 
   // select files for free space
   for (const auto& file: blob_gc_->fs_inputs()) {
-    // don't select file that already be selected to GC
-    if (gc_selected_marks.find(file->file_number()) != gc_selected_marks.end()){
+    // don't select files that already be selected to GC or has gc marked
+    if (gc_selected_marks.find(file->file_number()) != gc_selected_marks.end() || file->gc_mark() ){
       continue;
     }
-
+    bool selected = false;
     if (file->discardable_size() >= blob_gc_->titan_cf_options().free_space_threshold) {
+      selected = true;
+    } else {
+      // because discardable_size are lazily captured by compaction on LSM tree and
+      // can not reflect the real-time discardable_size, by sample files we can query
+      // LSM tree with the most up to date discardable information and hence more
+      // quickly reclaim disk space
+      Status s = DoSample(file, &selected);
+      if (!s.ok()) {
+        return s;
+      }
+    }
+    if (selected) {
       fs_result.push_back(file);
     }
   }
