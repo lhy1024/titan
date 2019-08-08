@@ -212,8 +212,8 @@ void BlobFileMeta::FinishFreeSpace(uint64_t new_file_size,
   discardable_size_ = discardable_size_ - static_cast<int64_t>(reclaim_size);
 }
 
-// TODO: delete it
 double BlobFileMeta::GetDiscardableRatio() const {
+  if (discardable_size_ <= 0) return 0;
   return static_cast<double>(discardable_size_) /
          static_cast<double>(file_size_);
 }

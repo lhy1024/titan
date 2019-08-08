@@ -69,8 +69,8 @@ class BlobGC {
 
 struct GCScore {
   uint64_t file_number;
-  double gc_score;
-  double fs_score;
+  uint64_t gc_score;
+  int64_t fs_score;
 };
 
 }  // namespace titandb
