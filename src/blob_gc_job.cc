@@ -671,7 +671,7 @@ Status BlobGCJob::DigHole() {
 
     // TODO(@lhy1024) post
     record_iter->GetFileRealSize(&after_size);
-    // inputs[i]->finish(after_size, before_size-after_size);
+    inputs[i]->FinishFreeSpace(after_size, before_size - after_size);
   }
   return s;
 }

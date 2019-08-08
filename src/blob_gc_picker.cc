@@ -15,7 +15,7 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
 
   bool stop_picking = false;
   bool maybe_continue_next_time = false;
-  auto gc_scores = blob_storage->gc_score();
+  auto& gc_scores = blob_storage->gc_score();
 
   // files with small size GC first
   std::sort(gc_scores.begin(), gc_scores.end(),
@@ -27,7 +27,7 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
   uint64_t gc_batch_size = 0;
   uint64_t estimate_output_size = 0;
   uint64_t next_gc_size = 0;
-  for (auto& gc_score : gc_scores) {
+  for (const auto& gc_score : gc_scores) {
     auto blob_file = blob_storage->FindFile(gc_score.file_number).lock();
     if (!blob_file ||
         blob_file->file_state() == BlobFileMeta::FileState::kBeingGC) {
@@ -78,7 +78,7 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
   uint64_t next_fs_size = 0;
   uint64_t fs_batch_size = 0;
   stop_picking = false;
-  for (auto& fs_score : gc_scores) {
+  for (const auto& fs_score : gc_scores) {
     auto blob_file = blob_storage->FindFile(fs_score.file_number).lock();
     if (!blob_file ||
         blob_file->file_state() == BlobFileMeta::FileState::kBeingGC ||
