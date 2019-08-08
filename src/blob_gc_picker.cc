@@ -15,7 +15,7 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
 
   bool stop_picking = false;
   bool maybe_continue_next_time = false;
-  auto& gc_scores = blob_storage->gc_score();
+  auto gc_scores = blob_storage->gc_score();
 
   // files with small size GC first
   std::sort(gc_scores.begin(), gc_scores.end(),
