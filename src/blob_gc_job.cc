@@ -139,7 +139,7 @@ Status BlobGCJob::Run() {
 Status BlobGCJob::SampleCandidateFiles() {
   std::vector<BlobFileMeta*> gc_sampled_inputs;
   std::vector<BlobFileMeta*> fs_sampled_inputs;
-  std::set<uint64_t> gc_selected_marks;
+  std::unordered_set<uint64_t> gc_selected_marks;
 
   // select files for GC
   for (const auto& file : blob_gc_->gc_inputs()) {
