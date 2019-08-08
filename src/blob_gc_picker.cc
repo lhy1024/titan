@@ -46,16 +46,17 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
       break;
     }
 
+    if (gc_batch_size >= cf_options_.max_gc_batch_size ||
+        estimate_output_size >= cf_options_.blob_file_target_size) {
+      // Stop pick file for this gc, but still check file for whether need
+      // trigger gc after this
+      stop_picking = true;
+    }
+    
     if (!stop_picking) {
       gc_blob_files.push_back(blob_file.get());
       gc_batch_size += blob_file->file_size();
       estimate_output_size += blob_file->GetValidSize();
-      if (gc_batch_size >= cf_options_.max_gc_batch_size ||
-          estimate_output_size >= cf_options_.blob_file_target_size) {
-        // Stop pick file for this gc, but still check file for whether need
-        // trigger gc after this
-        stop_picking = true;
-      }
     } else {
       next_gc_size += blob_file->file_size();
       if (next_gc_size > cf_options_.min_gc_batch_size) {
@@ -91,12 +92,13 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
       continue;
     }
 
+    if (fs_batch_size >= cf_options_.max_fs_batch_size) {
+      stop_picking = true;
+    }
+
     if (!stop_picking) {
       fs_blob_files.push_back(blob_file.get());
       fs_batch_size += blob_file->file_size();
-      if (fs_batch_size >= cf_options_.max_fs_batch_size) {
-        stop_picking = true;
-      }
     } else {
       if (maybe_continue_next_time) {
         break;
