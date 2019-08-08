@@ -120,12 +120,12 @@ void BlobStorage::ComputeGCScore() {
     }
 
     gc_score_.push_back({
-      file.first,
-      file.second->gc_mark() ? cf_options_.merge_small_file_threshold : file.second->GetValidSize(), // gc score
-      file.second->discardable_size() // free space score
+        file.first,
+        file.second->gc_mark() ? cf_options_.merge_small_file_threshold
+                               : file.second->GetValidSize(),  // gc score
+        file.second->discardable_size()  // free space score
     });
   }
-
 }
 
 }  // namespace titandb

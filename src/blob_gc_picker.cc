@@ -57,18 +57,18 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
         stop_picking = true;
       }
     } else {
-        next_gc_size += blob_file->file_size();
-        if (next_gc_size > cf_options_.min_gc_batch_size) {
-          maybe_continue_next_time = true;
-          ROCKS_LOG_INFO(db_options_.info_log,
-                         "remain more than %" PRIu64
-                         " bytes to be gc and trigger after this gc",
-                         next_gc_size);
-          break;
-        }
+      next_gc_size += blob_file->file_size();
+      if (next_gc_size > cf_options_.min_gc_batch_size) {
+        maybe_continue_next_time = true;
+        ROCKS_LOG_INFO(db_options_.info_log,
+                       "remain more than %" PRIu64
+                       " bytes to be gc and trigger after this gc",
+                       next_gc_size);
+        break;
+      }
     }
   }
-   // files with larger discardable size Free Space first
+  // files with larger discardable size Free Space first
   std::sort(gc_scores.begin(), gc_scores.end(),
             [](const GCScore& first, const GCScore& second) {
               return first.fs_score > second.fs_score;
@@ -78,7 +78,7 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
   uint64_t next_fs_size = 0;
   uint64_t fs_batch_size = 0;
   stop_picking = false;
-  for (auto& fs_score: gc_scores) {
+  for (auto& fs_score : gc_scores) {
     auto blob_file = blob_storage->FindFile(fs_score.file_number).lock();
     if (!blob_file ||
         blob_file->file_state() == BlobFileMeta::FileState::kBeingGC ||
@@ -116,11 +116,14 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
                   "got batch size %" PRIu64 ", estimate output %" PRIu64
                   " bytes",
                   gc_batch_size, estimate_output_size);
-  if ((gc_blob_files.empty() || gc_batch_size < cf_options_.min_gc_batch_size) && (fs_blob_files.empty() || fs_batch_size < cf_options_.min_fs_batch_size))
+  if ((gc_blob_files.empty() ||
+       gc_batch_size < cf_options_.min_gc_batch_size) &&
+      (fs_blob_files.empty() || fs_batch_size < cf_options_.min_fs_batch_size))
     return nullptr;
 
-  return std::unique_ptr<BlobGC>(new BlobGC(
-      std::move(gc_blob_files), std::move(fs_blob_files), std::move(cf_options_), maybe_continue_next_time));
+  return std::unique_ptr<BlobGC>(
+      new BlobGC(std::move(gc_blob_files), std::move(fs_blob_files),
+                 std::move(cf_options_), maybe_continue_next_time));
 }
 
 bool BasicBlobGCPicker::CheckBlobFile(BlobFileMeta* blob_file) const {

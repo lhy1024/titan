@@ -155,7 +155,8 @@ class BlobFileMeta {
   // Not persistent field
   FileState state_{FileState::kInit};
 
-  // discardable size can be reclaim, < 0 mean last free space over reclaim space
+  // discardable size can be reclaim, < 0 mean last free space over reclaim
+  // space
   int64_t discardable_size_{0};
 
   // gc_mark is set to true when this file is recovered from re-opening the DB

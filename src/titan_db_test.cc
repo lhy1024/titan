@@ -181,8 +181,7 @@ class TitanDBTest : public testing::Test {
     std::string file_name = BlobFileName(options_.dirname, file_number);
     ASSERT_OK(env_->GetFileSize(file_name, &file_size));
     OpenBlobFile(file_number, 0, options_, env_opt, env_, &rw_file);
-    BlobFileIterator iter(std::move(rw_file), file_number, file_size,
-                          options_);
+    BlobFileIterator iter(std::move(rw_file), file_number, file_size, options_);
     iter.SeekToFirst();
     for (auto& kv : data) {
       if (kv.second.size() < options_.min_blob_size) {
