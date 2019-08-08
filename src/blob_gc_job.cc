@@ -119,14 +119,14 @@ Status BlobGCJob::Run() {
     return s;
   }
 
-  if (!blob_gc_->gc_sampled_inputs().empty()) {
+  if (!blob_gc_->gc_sample_inputs().empty()) {
     s = DoRunGC();
     if (!s.ok()) {
       return s;
     }
   }
 
-  if (!blob_gc_->fs_sampled_inputs().empty()) {
+  if (!blob_gc_->fs_sample_inputs().empty()) {
     s = DigHole();
     if (!s.ok()) {
       return s;
@@ -190,10 +190,10 @@ Status BlobGCJob::SampleCandidateFiles() {
   }
 
   if (!gc_sampled_inputs.empty()) {
-    blob_gc_->set_gc_sampled_inputs(std::move(gc_sampled_inputs));
+    blob_gc_->set_gc_sample_inputs(std::move(gc_sampled_inputs));
   }
   if (!fs_sampled_inputs.empty()) {
-    blob_gc_->set_fs_sampled_inputs(std::move(fs_sampled_inputs));
+    blob_gc_->set_fs_sample_inputs(std::move(fs_sampled_inputs));
   }
   return Status::OK();
 }
@@ -399,7 +399,7 @@ Status BlobGCJob::DoRunGC() {
 Status BlobGCJob::BuildIterator(
     std::unique_ptr<BlobFileMergeIterator>* result) {
   Status s;
-  const auto& inputs = blob_gc_->gc_sampled_inputs();
+  const auto& inputs = blob_gc_->gc_sample_inputs();
   assert(!inputs.empty());
   std::vector<std::unique_ptr<BlobFileIterator>> list;
   for (std::size_t i = 0; i < inputs.size(); ++i) {
@@ -592,7 +592,7 @@ Status BlobGCJob::DeleteInputBlobFiles() {
   Status s;
   VersionEdit edit;
   edit.SetColumnFamilyID(blob_gc_->column_family_handle()->GetID());
-  for (const auto& file : blob_gc_->gc_sampled_inputs()) {
+  for (const auto& file : blob_gc_->gc_sample_inputs()) {
     ROCKS_LOG_INFO(db_options_.info_log, "Titan add obsolete file [%llu]",
                    file->file_number());
     metrics_.blob_db_gc_num_files++;
@@ -610,7 +610,7 @@ bool BlobGCJob::IsShutingDown() {
 
 Status BlobGCJob::DigHole() {
   Status s;
-  const auto& inputs = blob_gc_->fs_sampled_inputs();
+  const auto& inputs = blob_gc_->fs_sample_inputs();
   assert(!inputs.empty());
   for (std::size_t i = 0; i < inputs.size(); ++i) {
     std::unique_ptr<PosixRandomRWFile> file;

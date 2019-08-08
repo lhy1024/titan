@@ -25,18 +25,18 @@ class BlobGC {
   const std::vector<BlobFileMeta*>& gc_inputs() { return gc_inputs_; }
   const std::vector<BlobFileMeta*>& fs_inputs() { return fs_inputs_; }
 
-  void set_gc_sampled_inputs(std::vector<BlobFileMeta*>&& files) {
-    gc_sampled_inputs_ = std::move(files);
+  void set_gc_sample_inputs(std::vector<BlobFileMeta*>&& files) {
+    gc_sample_inputs_ = std::move(files);
   }
-  void set_fs_sampled_inputs(std::vector<BlobFileMeta*>&& files) {
-    fs_sampled_inputs_ = std::move(files);
+  void set_fs_sample_inputs(std::vector<BlobFileMeta*>&& files) {
+    fs_sample_inputs_ = std::move(files);
   }
 
-  const std::vector<BlobFileMeta*>& gc_sampled_inputs() {
-    return gc_sampled_inputs_;
+  const std::vector<BlobFileMeta*>& gc_sample_inputs() {
+    return gc_sample_inputs_;
   }
-  const std::vector<BlobFileMeta*>& fs_sampled_inputs() {
-    return fs_sampled_inputs_;
+  const std::vector<BlobFileMeta*>& fs_sample_inputs() {
+    return fs_sample_inputs_;
   }
 
   const TitanCFOptions& titan_cf_options() { return titan_cf_options_; }
@@ -58,8 +58,8 @@ class BlobGC {
  private:
   std::vector<BlobFileMeta*> gc_inputs_;
   std::vector<BlobFileMeta*> fs_inputs_;
-  std::vector<BlobFileMeta*> gc_sampled_inputs_;
-  std::vector<BlobFileMeta*> fs_sampled_inputs_;
+  std::vector<BlobFileMeta*> gc_sample_inputs_;
+  std::vector<BlobFileMeta*> fs_sample_inputs_;
   std::vector<BlobFileMeta*> outputs_;
   TitanCFOptions titan_cf_options_;
   ColumnFamilyHandle* cfh_{nullptr};
