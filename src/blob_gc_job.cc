@@ -137,8 +137,8 @@ Status BlobGCJob::Run() {
 }
 
 Status BlobGCJob::SampleCandidateFiles() {
-  std::vector<BlobFileMeta*> gc_result;
-  std::vector<BlobFileMeta*> fs_result;
+  std::vector<BlobFileMeta*> gc_sampled_inputs;
+  std::vector<BlobFileMeta*> fs_sampled_inputs;
   std::set<uint64_t> gc_selected_marks;
 
   // select files for GC
@@ -158,7 +158,7 @@ Status BlobGCJob::SampleCandidateFiles() {
     }
     if (selected) {
       gc_selected_marks.insert(file->file_number());
-      gc_result.push_back(file);
+      gc_sampled_inputs.push_back(file);
     }
   }
 
@@ -185,15 +185,15 @@ Status BlobGCJob::SampleCandidateFiles() {
       }
     }
     if (selected) {
-      fs_result.push_back(file);
+      fs_sampled_inputs.push_back(file);
     }
   }
 
-  if (!gc_result.empty()) {
-    blob_gc_->set_gc_sampled_inputs(std::move(gc_result));
+  if (!gc_sampled_inputs.empty()) {
+    blob_gc_->set_gc_sampled_inputs(std::move(gc_sampled_inputs));
   }
-  if (!fs_result.empty()) {
-    blob_gc_->set_fs_sampled_inputs(std::move(fs_result));
+  if (!fs_sampled_inputs.empty()) {
+    blob_gc_->set_fs_sampled_inputs(std::move(fs_sampled_inputs));
   }
   return Status::OK();
 }
