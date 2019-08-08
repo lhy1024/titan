@@ -79,6 +79,11 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
   uint64_t fs_batch_size = 0;
   stop_picking = false;
   for (const auto& fs_score : gc_scores) {
+    // fs_score < 0 means file had over reclaim
+    if (fs_score.fs_score < 0) {
+      break;
+    }
+
     auto blob_file = blob_storage->FindFile(fs_score.file_number).lock();
     if (!blob_file ||
         blob_file->file_state() == BlobFileMeta::FileState::kBeingGC ||
