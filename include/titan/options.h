@@ -101,7 +101,7 @@ struct TitanCFOptions : public ColumnFamilyOptions {
   // Max batch size for free space.
   //
   // Default: 2GB
-  uint64_t max_fs_batch_size{2 << 30};
+  uint64_t max_fs_batch_size{static_cast<uint64_t>(2) << 30};
 
   // Min batch size for free space.
   //
