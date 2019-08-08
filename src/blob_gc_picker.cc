@@ -52,7 +52,7 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
       // trigger gc after this
       stop_picking = true;
     }
-    
+
     if (!stop_picking) {
       gc_blob_files.push_back(blob_file.get());
       gc_batch_size += blob_file->file_size();
@@ -103,7 +103,8 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
       if (maybe_continue_next_time) {
         break;
       }
-      if (blob_file->discardable_size() >= static_cast<int64_t>(cf_options_.free_space_threshold)) {
+      if (blob_file->discardable_size() >=
+          static_cast<int64_t>(cf_options_.free_space_threshold)) {
         next_fs_size += blob_file->file_size();
         if (next_fs_size > cf_options_.min_fs_batch_size) {
           maybe_continue_next_time = true;

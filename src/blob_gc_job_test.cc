@@ -186,7 +186,8 @@ class BlobGCJobTest : public testing::Test {
 
     std::vector<BlobFileMeta*> tmp1;
     std::vector<BlobFileMeta*> tmp2;
-    BlobGC blob_gc(std::move(tmp1), std::move(tmp2), TitanCFOptions(), false /*trigger_next*/);
+    BlobGC blob_gc(std::move(tmp1), std::move(tmp2), TitanCFOptions(),
+                   false /*trigger_next*/);
     blob_gc.SetColumnFamily(cfh);
     BlobGCJob blob_gc_job(&blob_gc, base_db_, mutex_, TitanDBOptions(),
                           Env::Default(), EnvOptions(), nullptr, version_set_,

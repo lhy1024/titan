@@ -172,7 +172,8 @@ Status BlobGCJob::SampleCandidateFiles() {
     }
     bool selected = false;
     if (file->discardable_size() >=
-        static_cast<int64_t>(blob_gc_->titan_cf_options().free_space_threshold)) {
+        static_cast<int64_t>(
+            blob_gc_->titan_cf_options().free_space_threshold)) {
       selected = true;
     } else {
       // because discardable_size are lazily captured by compaction on LSM tree
