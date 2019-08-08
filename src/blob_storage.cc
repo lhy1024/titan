@@ -56,8 +56,8 @@ void BlobStorage::MarkFileObsolete(std::shared_ptr<BlobFileMeta> file,
   obsolete_files_.push_back(
       std::make_pair(file->file_number(), obsolete_sequence));
   file->FileStateTransit(BlobFileMeta::FileEvent::kDelete);
-  SubStats(stats_, cf_id_, TitanInternalStats::LIVE_BLOB_SIZE,
-           file->file_size() - file->discardable_size());
+  uint64_t live_blob_size = file->discardable_size() < 0 ? file->file_size() : file->file_size() - file->discardable_size();
+  SubStats(stats_, cf_id_, TitanInternalStats::LIVE_BLOB_SIZE, live_blob_size);
   SubStats(stats_, cf_id_, TitanInternalStats::LIVE_BLOB_FILE_SIZE,
            file->file_size());
   SubStats(stats_, cf_id_, TitanInternalStats::NUM_LIVE_BLOB_FILE, 1);

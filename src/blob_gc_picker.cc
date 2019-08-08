@@ -96,7 +96,7 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
       if (maybe_continue_next_time) {
         break;
       }
-      if (blob_file->discardable_size() >= cf_options_.free_space_threshold) {
+      if (blob_file->discardable_size() >= static_cast<int64_t>(cf_options_.free_space_threshold)) {
         next_fs_size += blob_file->file_size();
         if (next_fs_size > cf_options_.min_fs_batch_size) {
           maybe_continue_next_time = true;
