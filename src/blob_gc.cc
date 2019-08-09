@@ -1,4 +1,5 @@
 #include "blob_gc.h"
+#include "unordered_set"
 
 namespace rocksdb {
 namespace titandb {
@@ -28,19 +29,29 @@ void BlobGC::AddOutputFile(BlobFileMeta* blob_file) {
 }
 
 void BlobGC::MarkFilesBeingGC() {
+  std::unordered_set<uint64_t> gc_input_marks;
   for (auto& f : gc_inputs_) {
     f->FileStateTransit(BlobFileMeta::FileEvent::kGCBegin);
+    gc_input_marks.insert(f->file_number());
   }
   for (auto& f : fs_inputs_) {
+    if (gc_input_marks.find(f->file_number()) != gc_input_marks.end()) {
+      continue;
+    }
     f->FileStateTransit(BlobFileMeta::FileEvent::kGCBegin);
   }
 }
 
 void BlobGC::ReleaseGcFiles() {
+  std::unordered_set<uint64_t> gc_input_marks;
   for (auto& f : gc_inputs_) {
     f->FileStateTransit(BlobFileMeta::FileEvent::kGCCompleted);
+    gc_input_marks.insert(f->file_number());
   }
   for (auto& f : fs_inputs_) {
+    if (gc_input_marks.find(f->file_number()) != gc_input_marks.end()) {
+      continue;
+    }
     f->FileStateTransit(BlobFileMeta::FileEvent::kGCCompleted);
   }
 
