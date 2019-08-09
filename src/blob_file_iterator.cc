@@ -108,6 +108,10 @@ void BlobFileIterator::GetBlobRecord() {
     // Skip to next block
     iterate_offset_ = (iterate_offset_ / 4096 + 1) * 4096;
     file_->SeekNextData(&iterate_offset_);
+    if (iterate_offset_ >= end_of_blob_record_) {
+      valid_ = false;
+      return;
+    }
 
     // Read the header again
     status_ = file_->Read(iterate_offset_, kBlobHeaderSize, &header_buffer,
