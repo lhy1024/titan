@@ -143,6 +143,7 @@ TEST_F(BlobGCPickerTest, PickFileAndTriggerNextByGCJob) {
   TitanCFOptions titan_cf_options;
   titan_cf_options.max_gc_batch_size = 1U << 30;
   titan_cf_options.min_gc_batch_size = 512U << 20;
+  titan_cf_options.max_fs_batch_size = 0U << 20;
   titan_cf_options.blob_file_target_size = 256U << 20;
   titan_cf_options.merge_small_file_threshold = 10U << 20;
   titan_cf_options.free_space_threshold = 1U << 30;

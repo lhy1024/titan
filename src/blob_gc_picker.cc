@@ -59,7 +59,7 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
       estimate_output_size += blob_file->GetValidSize();
     } else {
       next_gc_size += blob_file->file_size();
-      if (next_gc_size > cf_options_.min_gc_batch_size) {
+      if (next_gc_size >= cf_options_.min_gc_batch_size) {
         maybe_continue_next_time = true;
         ROCKS_LOG_INFO(db_options_.info_log,
                        "remain more than %" PRIu64
@@ -106,7 +106,7 @@ std::unique_ptr<BlobGC> BasicBlobGCPicker::PickBlobGC(
       if (blob_file->discardable_size() >=
           static_cast<int64_t>(cf_options_.free_space_threshold)) {
         next_fs_size += blob_file->file_size();
-        if (next_fs_size > cf_options_.min_fs_batch_size) {
+        if (next_fs_size >= cf_options_.min_fs_batch_size) {
           maybe_continue_next_time = true;
           ROCKS_LOG_INFO(db_options_.info_log,
                          "remain more than %" PRIu64
