@@ -120,7 +120,7 @@ TEST_F(BlobGCPickerTest, TriggerNext) {
   AddBlobFile(3U, 1U << 30, 512U << 20);   // discardable_size = 512MB
   AddBlobFile(4U, 1U << 30, 512U << 20);   // discardable_size = 512MB
   UpdateBlobStorage();
-  auto blob_gc = basic_blob_gc_picker_->PickBlobGC(blob_storage_.get());
+  blob_gc = basic_blob_gc_picker_->PickBlobGC(blob_storage_.get());
   ASSERT_TRUE(blob_gc != nullptr);
   ASSERT_EQ(blob_gc->trigger_next(), true);
 
