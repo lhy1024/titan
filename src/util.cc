@@ -70,6 +70,7 @@ Slice Compress(const CompressionContext& ctx, const Slice& input,
       }
       break;
     default: {
+      assert(false);
     }  // Do not recognize this compression type
   }
 
