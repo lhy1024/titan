@@ -112,8 +112,8 @@ class BlobGCJobTest : public testing::Test {
     TitanCFOptions cf_options;
     LogBuffer log_buffer(InfoLogLevel::INFO_LEVEL, db_options.info_log.get());
     cf_options.min_gc_batch_size = 0;
-    cf_options.blob_file_discardable_ratio = 0.4;
-    cf_options.sample_file_size_ratio = 1;
+    cf_options.merge_small_file_threshold = 1U << 30;
+    cf_options.free_space_threshold = 1U << 30;
 
     std::unique_ptr<BlobGC> blob_gc;
     {
