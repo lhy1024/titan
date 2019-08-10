@@ -140,6 +140,9 @@ class BlobFileMeta {
   bool gc_mark() const { return gc_mark_; }
   void set_gc_mark(bool mark) { gc_mark_ = mark; }
 
+  void set_real_file_size(uint64_t size) { real_file_size_ = size; }
+  uint64_t real_file_size() const { return real_file_size_; }
+
   void FileStateTransit(const FileEvent& event);
 
   void AddDiscardableSize(uint64_t _discardable_size);
@@ -152,6 +155,7 @@ class BlobFileMeta {
 
   // Not persistent field
   FileState state_{FileState::kInit};
+  uint64_t real_file_size_{0};
 
   uint64_t discardable_size_{0};
   // gc_mark is set to true when this file is recovered from re-opening the DB
