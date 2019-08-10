@@ -121,7 +121,8 @@ class BlobFileMeta {
     kPendingGC,   // output of gc, waiting gc finish and keys adding to LSM
     kObsolete,    // already gced, but wait to be physical deleted
   };
-
+  // TODO: whenever a BlobFileMeta is create and init, 
+  // must set both file_offset_ and file_size_
   BlobFileMeta() = default;
   BlobFileMeta(uint64_t _file_number, uint64_t _file_size)
       : file_number_(_file_number), file_size_(_file_size) {}
@@ -132,6 +133,7 @@ class BlobFileMeta {
   Status DecodeFrom(Slice* src);
 
   uint64_t file_number() const { return file_number_; }
+  uint64_t file_offset() const { return file_offset_; }
   uint64_t file_size() const { return file_size_; }
   FileState file_state() const { return state_; }
   bool is_obsolete() const { return state_ == FileState::kObsolete; }
@@ -150,13 +152,14 @@ class BlobFileMeta {
  private:
   // Persistent field
   uint64_t file_number_{0};
-  uint64_t file_size_{0};
+  uint64_t file_offset_{0};
 
   // Not persistent field
   FileState state_{FileState::kInit};
 
   // discardable size can be reclaim, < 0 mean last free space over reclaim
   // space
+  uint64_t file_size_{0};
   int64_t discardable_size_{0};
 
   // gc_mark is set to true when this file is recovered from re-opening the DB

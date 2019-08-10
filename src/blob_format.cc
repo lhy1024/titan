@@ -135,7 +135,6 @@ void BlobFileMeta::EncodeTo(std::string* dst) const {
 }
 
 Status BlobFileMeta::DecodeFrom(Slice* src) {
-  // TODO: (@wjhuang2016) get file size from file system
   if (!GetVarint64(src, &file_number_) || !GetVarint64(src, &file_size_)) {
     return Status::Corruption("BlobFileMeta Decode failed");
   }
