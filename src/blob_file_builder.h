@@ -63,7 +63,8 @@ class BlobFileBuilder {
   Status status_;
   BlobEncoder encoder_;
   uint64_t remain_size_;
-  char zero_buffer_[4096]{0};
+  static const uint64_t block_size_{4096};
+  const char zero_buffer_[block_size_]{0};
 };
 
 }  // namespace titandb

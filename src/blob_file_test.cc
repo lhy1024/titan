@@ -151,6 +151,7 @@ class BlobFileTest : public testing::Test {
     TitanDBOptions db_options(options);
     TitanCFOptions cf_options(options);
     BlobFileCache cache(db_options, cf_options, {NewLRUCache(128)}, nullptr);
+    const uint64_t kBlockSize = 4096;
 
     const int n = 1000;
     std::vector<BlobHandle> handles(n);
@@ -179,12 +180,12 @@ class BlobFileTest : public testing::Test {
     ASSERT_OK(builder->Finish());
     ASSERT_OK(builder->status());
 
-    ASSERT_TRUE(handles[0].offset % 4096 == 0);
+    ASSERT_TRUE(handles[0].offset % kBlockSize == 0);
 
     for (int i = 1; i < n; i++) {
-      if (handles[i].offset % 4096 != 0) {
+      if (handles[i].offset % kBlockSize != 0) {
         ASSERT_TRUE(handles[i].offset + handles[i].size <=
-                    (handles[i].offset / 4096 + 1) * 4096);
+                    (handles[i].offset / kBlockSize + 1) * kBlockSize);
       }
     }
   }
