@@ -104,7 +104,9 @@ void BlobFileIterator::GetBlobRecord() {
   status_ = file_->Read(iterate_offset_, kBlobHeaderSize, &header_buffer,
                         header_buffer.get());
   if (!status_.ok()) return;
-  if (memcmp(header_buffer.get(), empty_record_header_, kBlobHeaderSize) == 0) {
+  if (iterate_offset_ % 4096 == 0) {
+    file_->SeekNextData(&iterate_offset_);
+  } else if (memcmp(header_buffer.get(), empty_record_header_, kBlobHeaderSize) == 0) {
     // Skip to next block
     iterate_offset_ = (iterate_offset_ / 4096 + 1) * 4096;
     file_->SeekNextData(&iterate_offset_);
