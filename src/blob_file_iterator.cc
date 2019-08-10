@@ -101,12 +101,19 @@ void BlobFileIterator::GetBlobRecord() {
   }
 
   FixedSlice<kBlobHeaderSize> header_buffer;
+  bool check_header = true;
+  if (iterate_offset_ % 4096 == 0) {
+    file_->SeekNextData(&iterate_offset_);
+    if (iterate_offset_ >= end_of_blob_record_) {
+      valid_ = false;
+      return;
+    }
+    check_header = false;
+  }
   status_ = file_->Read(iterate_offset_, kBlobHeaderSize, &header_buffer,
                         header_buffer.get());
   if (!status_.ok()) return;
-  if (iterate_offset_ % 4096 == 0) {
-    file_->SeekNextData(&iterate_offset_);
-  } else if (memcmp(header_buffer.get(), empty_record_header_, kBlobHeaderSize) == 0) {
+  if (check_header && memcmp(header_buffer.get(), empty_record_header_, kBlobHeaderSize) == 0) {
     // Skip to next block
     iterate_offset_ = (iterate_offset_ / 4096 + 1) * 4096;
     file_->SeekNextData(&iterate_offset_);
