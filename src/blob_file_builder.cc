@@ -23,7 +23,7 @@ void BlobFileBuilder::Add(const BlobRecord& record, BlobHandle* handle) {
 
   encoder_.EncodeRecord(record);
   handle->size = encoder_.GetEncodedSize();
-  if (handle->size > remain_size_) {
+  if (remain_size_ != 4096 && handle->size > remain_size_) {
     file_->Append(Slice(zero_buffer_, remain_size_));
   }
   handle->offset = file_->GetFileSize();
