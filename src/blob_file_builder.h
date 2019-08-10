@@ -62,6 +62,8 @@ class BlobFileBuilder {
 
   Status status_;
   BlobEncoder encoder_;
+  uint64_t remain_size_;
+  char zero_buffer__[4096]{0};
 };
 
 }  // namespace titandb
