@@ -71,12 +71,17 @@ class BlobStorage {
     }
   }
 
-  // for Test only
-  void TEST_MarkAllFilesForGC() {
+  // For Test only
+  void TEST_MarkAllFilesForGC() const {
     MutexLock l(&mutex_);
     for (auto& file : files_) {
       file.second->set_gc_mark(true);
     }
+  }
+
+  // For Test only
+  std::unordered_map<uint64_t, std::shared_ptr<BlobFileMeta>> TEST_GetAllFiles() const {
+    return files_;
   }
 
   void MarkDestroyed() {
