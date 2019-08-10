@@ -71,6 +71,14 @@ class BlobStorage {
     }
   }
 
+  // for Test only
+  void TEST_MarkAllFilesForGC() {
+    MutexLock l(&mutex_);
+    for (auto& file : files_) {
+      file.second->set_gc_mark(true);
+    }
+  }
+
   void MarkDestroyed() {
     MutexLock l(&mutex_);
     destroyed_ = true;

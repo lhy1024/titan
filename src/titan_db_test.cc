@@ -33,7 +33,7 @@ class TitanDBTest : public testing::Test {
     options_.create_if_missing = true;
     options_.min_blob_size = 32;
     options_.min_gc_batch_size = 1;
-    options_.merge_small_file_threshold = 1U << 30;
+    options_.merge_small_file_threshold = 0;
     options_.disable_background_gc = true;
     options_.blob_file_compression = CompressionType::kLZ4Compression;
     DeleteDir(env_, options_.dirname);
@@ -531,6 +531,10 @@ TEST_F(TitanDBTest, DeleteFilesInRange) {
   auto before = blob.lock()->NumBlobFiles();
   ASSERT_EQ(before, 6);
 
+  // make files to do sample, and hence gc the blob file of deleted SST
+  blob.lock()->TEST_MarkAllFilesForGC();
+  blob.lock()->ComputeGCScore();
+
   ASSERT_OK(db_impl_->TEST_StartGC(db_->DefaultColumnFamily()->GetID()));
   ASSERT_OK(db_impl_->TEST_PurgeObsoleteFiles());
 
@@ -866,7 +870,7 @@ TEST_F(TitanDBTest, BlobRunModeBasic) {
 
 TEST_F(TitanDBTest, FallbackModeEncounterMissingBlobFile) {
   options_.disable_background_gc = true;
-  options_.blob_file_discardable_ratio = 0.01;
+  options_.merge_small_file_threshold = 1U << 30;
   options_.min_blob_size = true;
   Open();
   ASSERT_OK(db_->Put(WriteOptions(), "foo", "v1"));
@@ -914,6 +918,7 @@ TEST_F(TitanDBTest, BackgroundErrorTrigger) {
   std::unique_ptr<TitanFaultInjectionTestEnv> mock_env(
       new TitanFaultInjectionTestEnv(env_));
   options_.env = mock_env.get();
+  options_.merge_small_file_threshold = 1U << 30;
   Open();
   std::map<std::string, std::string> data;
   const int kNumEntries = 100;
