@@ -205,9 +205,11 @@ class DigHoleTest : public testing::Test {
     uint64_t before_size = 0;
     GetRealSize(&before_size);
     ASSERT_EQ(before_size, expect_before_size);
-    ASSERT_EQ(before_size, blob_file_meta->real_file_size());
     // dig
     BlobFileMeta blob_file_meta(file_number_, file_size);
+    blob_file_meta.set_real_file_size(file_size);
+    blob_file_meta.FileStateTransit(BlobFileMeta::FileEvent::kDbRestart);
+    blob_file_meta.FileStateTransit(BlobFileMeta::FileEvent::kGCBegin);
     Status s = dig_hole_job_->Exec(&blob_file_meta);
     assert(s.ok());
     // check after size
@@ -216,7 +218,7 @@ class DigHoleTest : public testing::Test {
     assert(before_size >= after_size);
     GetExpectAfterSize();
     ASSERT_EQ(after_size, expect_after_size);
-    ASSERT_EQ(after_size, blob_file_meta->real_file_size());
+    ASSERT_EQ(after_size, blob_file_meta.real_file_size());
     // check
     CheckKeyExists();
   }
