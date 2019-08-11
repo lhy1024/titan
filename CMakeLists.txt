@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 project(titan)
 enable_language(CXX)
 enable_language(C)
-
+set(ROCKSDB_DIR "/home/lhy/summer/lhy1024/rocksdb")
 if (NOT DEFINED ROCKSDB_DIR)
   message(FATAL_ERROR "ROCKSDB_DIR is not defined.")
 endif()
