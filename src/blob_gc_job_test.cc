@@ -262,7 +262,7 @@ class BlobGCJobTest : public testing::Test {
     iter->SeekToFirst();
     auto* db_iter = db_->NewIterator(ReadOptions(), db_->DefaultColumnFamily());
     db_iter->SeekToFirst();
-    for (int i = MAX_KEY_NUM / 2; i < MAX_KEY_NUM; i++) {
+    for (int i = 0; i < MAX_KEY_NUM / 2; i++) {
       if (i % 2 == 0) continue;
       ASSERT_OK(iter->status());
       ASSERT_TRUE(iter->Valid());
