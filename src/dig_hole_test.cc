@@ -215,6 +215,7 @@ class DigHoleTest : public testing::Test {
     assert(before_size >= after_size);
     GetExpectAfterSize();
     ASSERT_EQ(after_size, expect_after_size);
+    ASSERT_EQ(after_size, blob_file_meta->real_file_size());
     // check
     CheckKeyExists();
   }
