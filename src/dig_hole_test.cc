@@ -77,9 +77,9 @@ class DigHoleTest : public testing::Test {
     assert(s.ok());
   }
 
-  void GetExpectBeforeSize(const BlobHandle &handle) {
+  void GetExpectBeforeSize(const BlobHandle &the_last_handle) {
     expect_before_size =
-        ((handle.offset + handle.size - 1) / kBlockSize + 1) * kBlockSize +
+        ((the_last_handle.offset + the_last_handle.size - 1) / kBlockSize + 1) * kBlockSize +
         kBlockSize /*foot*/;
     assert(expect_before_size % kBlockSize == 0);
   }
