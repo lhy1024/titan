@@ -85,7 +85,7 @@ class DigHoleTest : public testing::Test {
   }
 
   void GetExpectAfterSize() {
-    int64_t blocks_num = expect_before_size / kBlockSize;
+    uint64_t blocks_num = expect_before_size / kBlockSize;
     std::vector<uint64_t> flags(blocks_num, 0);
     flags[0] = flags[blocks_num - 1] = 1;  // head and foot
     for (const auto &iter : data_) {
