@@ -307,8 +307,9 @@ TEST_F(TitanDBTest, FileLifetime) {
   options_.disable_background_gc = false;
   options_.min_gc_batch_size = 0;
   options_.min_fs_batch_size = 0;
-  options_.merge_small_file_threshold = 300 * options_.min_blob_size;
-  options_.free_space_threshold = 100 * options_.min_blob_size;
+  options_.min_blob_size = 128;
+  options_.merge_small_file_threshold = 200 * options_.min_blob_size;
+  options_.free_space_threshold = 50 * options_.min_blob_size;
   Open();
 
   auto blob = GetBlobStorage(db_->DefaultColumnFamily());
@@ -347,7 +348,7 @@ TEST_F(TitanDBTest, FileLifetime) {
     // after dig hole the blob file still exits
     ASSERT_TRUE(files_2.find(f.first) != files_2.end());
     // after dig hole the blob file become smaller
-    ASSERT_TRUE(f.second->real_file_size() >
+    ASSERT_TRUE(f.second->real_file_size() >=
                 files_2[f.first]->real_file_size());
   }
 
@@ -381,8 +382,9 @@ TEST_F(TitanDBTest, PickFileToGCAndFS) {
   options_.disable_background_gc = false;
   options_.min_gc_batch_size = 0;
   options_.min_fs_batch_size = 0;
-  options_.merge_small_file_threshold = 300 * options_.min_blob_size;
-  options_.free_space_threshold = 100 * options_.min_blob_size;
+  options_.min_blob_size = 128;
+  options_.merge_small_file_threshold = 200 * options_.min_blob_size;
+  options_.free_space_threshold = 50 * options_.min_blob_size;
   Open();
 
   auto blob = GetBlobStorage(db_->DefaultColumnFamily());
@@ -424,7 +426,7 @@ TEST_F(TitanDBTest, PickFileToGCAndFS) {
   for (auto& old_file : old_files) {
     if (new_files.find(old_file.first) != new_files.end()) {
       // blob file that had been dig hole
-      ASSERT_TRUE(old_file.second->real_file_size() >
+      ASSERT_TRUE(old_file.second->real_file_size() >=
                   new_files[old_file.first]->real_file_size());
       had_dighole = true;
     } else {
