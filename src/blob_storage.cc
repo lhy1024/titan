@@ -51,6 +51,7 @@ void BlobStorage::AddBlobFile(std::shared_ptr<BlobFileMeta>& file) {
     Status s = OpenBlobFile(file->file_number(), 0, db_options_, EnvOptions(),
                             db_options_.env, &random_rw_file_);
     if (!s.ok()) {
+      // We can't return error here, set it to file_size as a workaround.
       file->set_real_file_size(file->file_size());
     } else {
       uint64_t real_file_size = 0;
