@@ -218,15 +218,14 @@ class BlobGCJobTest : public testing::Test {
     }
     Flush();
     std::string result;
-    for (int i = 0; i < MAX_KEY_NUM; i++) {
-      if (i % 2 != 0) continue;
+    for (int i = MAX_KEY_NUM/2; i < MAX_KEY_NUM; i++) {
       db_->Delete(WriteOptions(), GenKey(i));
     }
     Flush();
     auto b = GetBlobStorage(base_db_->DefaultColumnFamily()->GetID()).lock();
     ASSERT_EQ(b->files_.size(), 1);
     auto old = b->files_.begin()->first;
-    uint64_t old_file_size = b->files_.begin()->second->file_size();
+    uint64_t old_file_size = b->files_.begin()->second->real_file_size();
     //    for (auto& f : b->files_) {
     //      f.second->marked_for_sample = false;
     //    }
@@ -249,7 +248,7 @@ class BlobGCJobTest : public testing::Test {
     b = GetBlobStorage(base_db_->DefaultColumnFamily()->GetID()).lock();
     ASSERT_EQ(b->files_.size(), 1);
     auto new1 = b->files_.begin()->first;
-    uint64_t new_file_size = b->files_.begin()->second->file_size();
+    uint64_t new_file_size = b->files_.begin()->second->real_file_size();
 
     if (run_gc) {
       ASSERT_TRUE(old != new1);
@@ -263,7 +262,7 @@ class BlobGCJobTest : public testing::Test {
     iter->SeekToFirst();
     auto* db_iter = db_->NewIterator(ReadOptions(), db_->DefaultColumnFamily());
     db_iter->SeekToFirst();
-    for (int i = 0; i < MAX_KEY_NUM; i++) {
+    for (int i = MAX_KEY_NUM/2; i < MAX_KEY_NUM; i++) {
       if (i % 2 == 0) continue;
       ASSERT_OK(iter->status());
       ASSERT_TRUE(iter->Valid());
@@ -280,8 +279,6 @@ class BlobGCJobTest : public testing::Test {
       iter->Next();
       db_iter->Next();
     }
-    delete db_iter;
-    ASSERT_FALSE(iter->Valid() || !iter->status().ok());
     DestroyDB();
   }
 };
