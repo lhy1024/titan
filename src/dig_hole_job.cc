@@ -93,7 +93,6 @@ Status DigHoleJob::Exec(BlobFileMeta *input) {
     return record_iter->status();
   }
 
-  // TODO(@lhy1024) post
   record_iter->GetFileRealSize(&after_size);
   input->FinishFreeSpace(after_size, before_size - after_size);
   return s;
