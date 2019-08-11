@@ -263,7 +263,6 @@ class BlobGCJobTest : public testing::Test {
     auto* db_iter = db_->NewIterator(ReadOptions(), db_->DefaultColumnFamily());
     db_iter->SeekToFirst();
     for (int i = 0; i < MAX_KEY_NUM / 2; i++) {
-      if (i % 2 == 0) continue;
       ASSERT_OK(iter->status());
       ASSERT_TRUE(iter->Valid());
       ASSERT_TRUE(iter->key().compare(Slice(GenKey(i))) == 0);
@@ -279,6 +278,7 @@ class BlobGCJobTest : public testing::Test {
       iter->Next();
       db_iter->Next();
     }
+    delete db_iter;
     DestroyDB();
   }
 };
