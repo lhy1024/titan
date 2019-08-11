@@ -254,7 +254,7 @@ class BlobGCJobTest : public testing::Test {
       ASSERT_TRUE(old != new1);
     } else {
       ASSERT_TRUE(old == new1);
-      ASSERT_TRUE(old_file_size >= new_file_size);
+      ASSERT_TRUE(old_file_size > new_file_size);
     }
 
     if (run_gc) {

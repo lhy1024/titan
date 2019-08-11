@@ -307,7 +307,7 @@ TEST_F(TitanDBTest, FileLifetime) {
   options_.disable_background_gc = false;
   options_.merge_small_file_threshold = 50 * options_.min_blob_size;
   options_.free_space_threshold = 10 * options_.min_blob_size;
-  Reopen();
+  Open();
   
   auto blob = GetBlobStorage(db_->DefaultColumnFamily());
 
@@ -334,8 +334,6 @@ TEST_F(TitanDBTest, FileLifetime) {
   }
   Flush();
   CompactAll();
-
-  sleep(5);
 
   auto files_2 = blob.lock()->TEST_GetAllFiles();
   ASSERT_EQ(files_2.size(), 2);
