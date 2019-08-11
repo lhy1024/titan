@@ -181,9 +181,9 @@ class DigHoleTest : public testing::Test {
   void Test(uint64_t threshold_discard) {
     NewBuilder();
     // add records
-    int n = Random() * kRecordNum / kRandomMax + 1;
+    int32_t n = Random() * kRecordNum / kRandomMax + 1;
     std::vector<BlobHandle> handles(n);
-    for (int i = 0; i < n; i++) {
+    for (int32_t i = 0; i < n; i++) {
       auto id = std::to_string(i);
       std::string value =
           std::string(Random() * kValueMaxLength / kRandomMax, 'v');
@@ -193,7 +193,7 @@ class DigHoleTest : public testing::Test {
     FinishBuilder();
     GetExpectBeforeSize(handles[n - 1]);
     // del records
-    for (int i = 0; i < n; i++) {
+    for (int32_t i = 0; i < n; i++) {
       auto id = std::to_string(i);
       if (Random() > threshold_discard) {
         DelKeyValue(id);
@@ -222,7 +222,7 @@ class DigHoleTest : public testing::Test {
 
 TEST_F(DigHoleTest, Test) {
   assert(kRandomMax%kTestStep==0);
-  for (uint64_t i = 0; i <= kRandomMax; i+=kTestStep) {
+  for (uint32_t i = 0; i <= kRandomMax; i+=kTestStep) {
     Test(i);
   }
 }
