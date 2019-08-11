@@ -205,6 +205,7 @@ class DigHoleTest : public testing::Test {
     uint64_t before_size = 0;
     GetRealSize(&before_size);
     ASSERT_EQ(before_size, expect_before_size);
+    ASSERT_EQ(before_size, blob_file_meta->real_file_size());
     // dig
     BlobFileMeta blob_file_meta(file_number_, file_size);
     Status s = dig_hole_job_->Exec(&blob_file_meta);
