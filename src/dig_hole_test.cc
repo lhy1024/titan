@@ -1,13 +1,12 @@
 #include "blob_file_iterator.h"
 
+#include <fcntl.h>
 #include <cinttypes>
-
 #include "blob_file_builder.h"
 #include "blob_file_cache.h"
 #include "blob_file_reader.h"
 #include "dig_hole_job.h"
 #include "env/io_posix.h"
-#include "glog/logging.h"
 #include "util/filename.h"
 #include "util/testharness.h"
 namespace rocksdb {
@@ -81,7 +80,7 @@ class DigHoleTest : public testing::Test {
     expect_before_size =
         ((the_last_handle.offset + the_last_handle.size - 1) / kBlockSize + 1) *
             kBlockSize +
-        kBlockSize /*foot*/;
+            kBlockSize /*foot*/;
     assert(expect_before_size % kBlockSize == 0);
   }
 
@@ -114,17 +113,20 @@ class DigHoleTest : public testing::Test {
 
   std::string DecodeKey(const Slice &key) {
     std::string data = std::string(key.data());
-    return data.substr(0, kKeyLength);
+    assert(data.length()>=kKeyLength);
+    std::string ans = data.substr(0, kKeyLength);
+    return ans;
   }
 
   void AddKeyValue(const std::string &key, const std::string &value,
                    BlobHandle *blob_handle) {
+    std::string key_str= EncodeKey(key);
     BlobRecord record;
-    record.key = EncodeKey(key);
+    record.key =key_str;
     record.value = value;
     builder_->Add(record, blob_handle);
     ASSERT_OK(builder_->status());
-    data_.insert({record.key.data(), blob_handle});
+    data_.insert({key_str, blob_handle});
   }
 
   void DelKeyValue(const std::string &key) {
@@ -172,7 +174,7 @@ class DigHoleTest : public testing::Test {
     for (auto &iter : data_) {
       bool ans = keys_in_file.find(iter.first) != keys_in_file.end();
       if (!ans) {
-        LOG(INFO) << iter.first;
+        // LOG(INFO) << iter.first;
         assert(ans);
       }
     }
@@ -183,9 +185,9 @@ class DigHoleTest : public testing::Test {
   void Test(uint64_t threshold_discard) {
     NewBuilder();
     // add records
-    int32_t n = Random() * kRecordNum / kRandomMax + 1;
+    const int n = Random() * kRecordNum / kRandomMax + 1;
     std::vector<BlobHandle> handles(n);
-    for (int32_t i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
       auto id = std::to_string(i);
       std::string value =
           std::string(Random() * kValueMaxLength / kRandomMax, 'v');
@@ -219,7 +221,9 @@ class DigHoleTest : public testing::Test {
     GetRealSize(&after_size);
     assert(before_size >= after_size);
     GetExpectAfterSize();
+#ifdef FALLOC_FL_PUNCH_HOLE
     ASSERT_EQ(after_size, expect_after_size);
+#endif
     ASSERT_EQ(after_size, blob_file_meta.real_file_size());
     // check
     CheckKeyExists();

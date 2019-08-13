@@ -25,11 +25,8 @@ Status OpenBlobFile(uint64_t file_number, uint64_t readahead_size,
   Status s = env->NewRandomRWFile(file_name, &file, env_options);
   if (!s.ok()) return s;
 
-  auto file_ptr = dynamic_cast<PosixRandomRWFile*>(file.release());
-  if (file_ptr == nullptr) {
-    return Status::NotSupported(
-        "While convert RandomRWFile to PosixRandomRWFile");
-  }
+  // TODO: make sure the file's type is PosixRandomRWFile*
+  auto file_ptr = static_cast<PosixRandomRWFile*>(file.release());
 
   result->reset(file_ptr);
 
@@ -52,7 +49,12 @@ Status NewBlobFileReader(uint64_t file_number, uint64_t readahead_size,
   if (readahead_size > 0) {
     file = NewReadaheadRandomAccessFile(std::move(file), readahead_size);
   }
-  result->reset(new RandomAccessFileReader(std::move(file), file_name));
+  // Currently only `BlobGCJob` will call `NewBlobFileReader()`. We set
+  // `for_compaction=true` in this case to enable rate limiter.
+  result->reset(new RandomAccessFileReader(
+      std::move(file), file_name, nullptr /*env*/, nullptr /*stats*/,
+      0 /*hist_type*/, nullptr /*file_read_hist*/, env_options.rate_limiter,
+      true /*for compaction*/));
   return s;
 }
 
